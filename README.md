@@ -49,7 +49,7 @@ web_fetch ──► dsh-web-fetch-http（元宝无抓取能力）
 ```bash
 dsh plugin --profile web add dsh-web-search-yuanbao        # 从 npm
 dsh plugin --profile web add dsh-web-search-yuanbao@0.2.2  # 锁版本
-dsh plugin --profile web add github:OWNER/dsh-web-search-yuanbao  # 从源码
+dsh plugin --profile web add github:Alancere/dsh-web-search-yuanbao  # 从源码
 ```
 
 安装后确认 profile 的 `package.json` 里 `dsh.profile.bundles` 含 `dsh-web-search-yuanbao`，再重启 `dsh web`。
