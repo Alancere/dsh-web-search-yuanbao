@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2
+
+- `@deepseek-ai/schemastery` 由 peer 改为真实依赖：干净 profile 里也会被装进 node_modules，
+  设置页表单不再因为解析不到 schema 而消失。
+
 ## 0.2.1
 
 首个公开版本。

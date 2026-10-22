@@ -1,6 +1,6 @@
 {
   "name": "dsh-web-search-yuanbao",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Tencent Yuanbao Search (SearchPro) for DeepSeek Harness: a ctx.web search provider plus a model-facing yuanbao_search tool with version-aware parameter handling",
   "type": "module",
   "main": "lib/index.js",
@@ -18,15 +18,6 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
-    }
-  },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "~4.0.5",
-    "@deepseek-ai/schemastery": "~3.18.5"
-  },
-  "peerDependenciesMeta": {
-    "@deepseek-ai/schemastery": {
-      "optional": true
     }
   },
   "keywords": [
@@ -59,5 +50,8 @@
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "prepack": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "~3.18.5"
   }
 }

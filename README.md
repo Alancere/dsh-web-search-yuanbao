@@ -48,7 +48,7 @@ web_fetch ──► dsh-web-fetch-http（元宝无抓取能力）
 
 ```bash
 dsh plugin --profile web add dsh-web-search-yuanbao        # 从 npm
-dsh plugin --profile web add dsh-web-search-yuanbao@0.2.1  # 锁版本
+dsh plugin --profile web add dsh-web-search-yuanbao@0.2.2  # 锁版本
 dsh plugin --profile web add github:OWNER/dsh-web-search-yuanbao  # 从源码
 ```
 
@@ -59,12 +59,14 @@ dsh plugin --profile web add github:OWNER/dsh-web-search-yuanbao  # 从源码
 
 ```bash
 pnpm pack                                              # 会先跑一遍测试（prepack）
-dsh plugin --profile web add ./dsh-web-search-yuanbao-0.2.1.tgz
+dsh plugin --profile web add ./dsh-web-search-yuanbao-0.2.2.tgz
 ```
 
-**不要用 `link:` 安装**：`link:` 保留符号链接，Node 按真实路径解析依赖，插件就找不到
-profile 里提升上来的 `@deepseek-ai/schemastery`，`Config` 退化为 undefined，设置页表单随之消失
-（插件本身仍可用）。改代码后必须**先升版本号再 pack**，否则 pnpm 按 lockfile 跳过，装上去还是旧代码。
+**不要用 `link:` 安装**：`link:` 保留符号链接，Node 按真实路径解析依赖，pnpm 又不会替你安装
+被链接包的 dependencies，`@deepseek-ai/schemastery` 就解析不到，`Config` 退化为 undefined，
+设置页表单随之消失（插件本身仍可用）。非要用 `link:`，得在插件目录里自己跑一次 `pnpm install`。
+
+改代码后必须**先升版本号再 pack**，否则 pnpm 按 lockfile 跳过，装上去还是旧代码。
 
 </details>
 
