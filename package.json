@@ -1,0 +1,63 @@
+{
+  "name": "dsh-web-search-yuanbao",
+  "version": "0.2.1",
+  "description": "Tencent Yuanbao Search (SearchPro) for DeepSeek Harness: a ctx.web search provider plus a model-facing yuanbao_search tool with version-aware parameter handling",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.0.5",
+    "@deepseek-ai/schemastery": "~3.18.5"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis",
+    "web-search",
+    "search-provider",
+    "yuanbao",
+    "tencent-cloud",
+    "agent-tool"
+  ],
+  "author": "Peng Jiahui",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/dsh-web-search-yuanbao.git"
+  },
+  "homepage": "https://github.com/OWNER/dsh-web-search-yuanbao#readme",
+  "bugs": {
+    "url": "https://github.com/OWNER/dsh-web-search-yuanbao/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "prepack": "node --test test/*.test.mjs"
+  }
+}
