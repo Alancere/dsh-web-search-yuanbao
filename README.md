@@ -58,8 +58,8 @@ dsh plugin --profile web add github:Alancere/dsh-web-search-yuanbao  # 从源码
 <summary>本地开发 / 未发布的版本</summary>
 
 ```bash
-pnpm pack                                              # 会先跑一遍测试（prepack）
-dsh plugin --profile web add ./dsh-web-search-yuanbao-0.2.2.tgz
+pnpm pack                                              # prepublishOnly 只在 publish 时跑测试
+dsh plugin --profile web add ./dsh-web-search-yuanbao-0.2.3.tgz
 ```
 
 **不要用 `link:` 安装**：`link:` 保留符号链接，Node 按真实路径解析依赖，pnpm 又不会替你安装
@@ -70,21 +70,85 @@ dsh plugin --profile web add ./dsh-web-search-yuanbao-0.2.2.tgz
 
 </details>
 
-## 3. 密钥
+## 3. 第三方用户怎么配自己的 API Key
 
-解析顺序：`config.apiKey` → `ctx.credentials.resolve(apiKeyEnv)` → `process.env[apiKeyEnv]`。
+插件自带的 Key 只是作者本地的引用名，**每个用户必须用自己在腾讯云创建的 Key**。四步：
 
-推荐写进 credentials 存储（与 Models 页同一机制，权限 600）：
+### 步骤 1：先在腾讯云拿到自己的 Key
+
+1. 登录腾讯云并完成实名认证（个人/企业都可）。
+2. 打开元宝搜索控制台 <https://console.cloud.tencent.com/wsapi/index> → **开通服务** → 选版本购买。
+3. **概览 → 服务 API KEY 方式 → 创建 API KEY** → 命名 → 弹窗里复制（**只显示这一次**）。
+
+> 注意：极速版只支持 `Query` 与 `Site`，`Cnt/Mode/Industry/Freshness` 不生效；
+> 需要这些能力要选标准版或旗舰版。
+
+### 步骤 2：安装插件
+
+```bash
+dsh plugin --profile web add github:Alancere/dsh-web-search-yuanbao
+dsh --profile web                 # 或重启已在运行的 dsh web
+```
+
+### 步骤 3：把 Key 填进设置页
+
+**插件 → 已安装 → 元宝搜索**，把 Key 粘进 `API Key` 字段，保存即可（改动即时生效，不用重启）。
+
+这个表单由插件的 `Config` schema 自动生成，字段与第 5 节一致。`apiKey` 声明了
+`role('secret')`：值不会被回显，也不会出现在 profile 的 patch 明文里。
+
+如果你更喜欢用命令/文件配置，三选一：
 
 ```yaml
-# $DSH_HOME/.credentials.yaml
-refs:
-  TENCENTCLOUD_WSA_APIKEY: sk-xxxxxxxx
+# A. profile 的 cordis.patch.yml（会明文落盘，不推荐长期用）
+- id: web-search-yuanbao
+  config:
+    apiKey: sk-你的Key
 ```
+
+```yaml
+# B. 凭据存储 $DSH_HOME/.credentials.yaml（权限 600，与 Models 页同一机制）
+refs:
+  TENCENTCLOUD_WSA_APIKEY: sk-你的Key
+```
+
+```bash
+# C. 启动环境变量（注意 GUI 启动的 dsh 读不到 shell 里的 export）
+export TENCENTCLOUD_WSA_APIKEY=sk-你的Key
+```
+
+### 步骤 4：验证
+
+随便问一个有时效性的问题（“今天的汇率”“最近一周的 AI 新闻”），工具结果首行应当是：
+
+```text
+元宝搜索「今日长沙天气」（极速版，10 条）
+```
+
+看到这行就说明搜索后端已经是元宝了。也可以直接问“用 yuanbao_search 查今天的新闻”。
+
+## 4. 密钥解析优先级
+
+`config.apiKey`（含设置页写入的值）→ `ctx.credentials.resolve(apiKeyEnv)` → `process.env[apiKeyEnv]`。
+
+引用名默认为 `TENCENTCLOUD_WSA_APIKEY`，可用 `apiKeyEnv` 改成任意环境变量名。三个来源都没有时，
+错误码是 `WEB_PROVIDER_CREDENTIAL_MISSING`，提示信息会直接告诉你缺哪一层。
+
+### 常见问题
+
+| 现象 | 原因 |
+|---|---|
+| 设置页里找不到「元宝搜索」 | 插件没真正加载：检查 profile 的 `dsh.profile.bundles` 是否含 `dsh-web-search-yuanbao`，装完要重启 |
+| 表单是空的 / 字段不显示 | 用 `link:` 安装导致 `@deepseek-ai/schemastery` 解析失败；改用 `github:` 或 tarball |
+| 报 `ResourceNotFound` | 腾讯云侧没开通元宝搜索服务 |
+| 报 `UnauthorizedOperation` | Key 错了/失效，或子账号没有 WSA 全读写权限（主账号在 CAM 里授权） |
+| 结果里说“已忽略 count/freshness” | 你的套餐是极速版，换成标准版/旗舰版才生效 |
+| 填了参数但结果一样 | 同上，极速版服务端直接忽略这些参数 |
+| `web_search` 仍像在走别的引擎 | 有另一个可用 provider 抢了选择权；用 `DSH_WEB_SEARCH_PROVIDER=yuanbao` 或改 `web` 行的 `searchProvider` |
 
 也可以直接在设置页的「API Key」字段里填（`role('secret')`，不回显）。
 
-## 4. 动态配置（设置页自动表单）
+## 5. 动态配置（设置页自动表单）
 
 插件导出的 `Config` 字段：
 
@@ -107,7 +171,7 @@ refs:
 验证表单确实注册（不打开 UI 的检查方式）：插件以 `ns=web-search-yuanbao`、`autoGenerate=true`
 出现在 `ctx.settings.describe()` 里。
 
-## 5. `yuanbao_search` 工具（模型自己决定参数）
+## 6. `yuanbao_search` 工具（模型自己决定参数）
 
 | 参数 | 类型 | 说明 |
 |---|---|---|
@@ -125,7 +189,7 @@ refs:
 元宝搜索「今日长沙天气」（极速版，10 条；已忽略极速版不支持的 count（条数）、industry（垂直领域）、freshness（时效））
 ```
 
-## 6. 版本能力矩阵与降级
+## 7. 版本能力矩阵与降级
 
 | 能力 | 极速版 | 标准版 | 旗舰版 |
 |---|---|---|---|
@@ -142,7 +206,7 @@ refs:
    实测极速版可能**不报错、直接忽略**这些参数——此时按最终版本重新结算「哪些参数没被采纳」，
    在结果里明示，避免看起来像是生效了。
 
-## 7. 切换与回滚
+## 8. 切换与回滚
 
 ```yaml
 # profile 的 cordis.patch.yml（优先级高于插件 bundle）
@@ -157,7 +221,7 @@ DSH_WEB_SEARCH_PROVIDER=deepseek-official dsh web   # 等价
 dsh plugin --profile web remove dsh-web-search-yuanbao
 ```
 
-## 8. 错误码映射
+## 9. 错误码映射
 
 | 元宝 | 本插件 `code` |
 |---|---|
@@ -170,13 +234,13 @@ dsh plugin --profile web remove dsh-web-search-yuanbao
 | 超时 | `WEB_PROVIDER_TIMEOUT` |
 | 取消 | `WEB_ABORTED` |
 
-## 9. 自测
+## 10. 自测
 
 ```bash
 node --test test/*.test.mjs      # 16 项：映射/条数/降级/版本结算/错误码/取消
 ```
 
-## 10. 已知限制
+## 11. 已知限制
 
 - **没有 fetch**：`web_fetch` 仍由 `dsh-web-fetch-http` 提供。
 - **设置页下拉里没有它**：内置「网页搜索」卡片只列官方 provider；元宝的配置走
