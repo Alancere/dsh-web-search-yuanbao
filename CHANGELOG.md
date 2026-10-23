@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.3
+
+- 修复 GitHub 安装被 pnpm 拦截：`prepack` 改为 `prepublishOnly`。
+  pnpm 把 git 来源的 `prepack` 视作安装期构建脚本，会要求用户在自己的
+  `pnpm-workspace.yaml` 里加 `allowBuilds`；本包发布的是预编译产物，不需要构建，
+  换脚本后 `dsh plugin add github:Alancere/dsh-web-search-yuanbao` 直接可用。
+
 ## 0.2.2
 
 - `@deepseek-ai/schemastery` 由 peer 改为真实依赖：干净 profile 里也会被装进 node_modules，

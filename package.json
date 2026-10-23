@@ -1,6 +1,6 @@
 {
   "name": "dsh-web-search-yuanbao",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Tencent Yuanbao Search (SearchPro) for DeepSeek Harness: a ctx.web search provider plus a model-facing yuanbao_search tool with version-aware parameter handling",
   "type": "module",
   "main": "lib/index.js",
@@ -49,7 +49,7 @@
   },
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "prepack": "node --test test/*.test.mjs"
+    "prepublishOnly": "node --test test/*.test.mjs"
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "~3.18.5"
